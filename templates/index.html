@@ -5,9 +5,10 @@
 <p> No blogs yet</p>
 {% else %}
 
-    {% for blog in blogs %}
-    <h2>{{blog.title}}</h2>
-    <h3>{{blog.body}}</h3>
+    {% for blog in blogs | reverse %}
+    <h3>{{blog.title}}</h2>
+    <h6>{{blog.date}}</h6>
+    <p>{{blog.body}}</p>
     {% endfor %}
 {% endif %}
 {% endblock %}
