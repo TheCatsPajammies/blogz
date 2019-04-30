@@ -28,17 +28,28 @@ def index():
 
     return render_template('index.html', title="Build a Blog!", blogs=blogs)
 
+@app.route('/blog', methods=['GET'])
+def blog():
+    id = request.args.get('blog-id')
+    blog = Blog.query.filter_by(id = id).first()
+    return render_template("blog.html", blog=blog)
+
 @app.route('/new-blog', methods=['POST','GET'])
 def new_entry():
     if request.method == 'POST':
         title = request.form['title']
         today = str(date.today())
         body = request.form['body']
-        
+        if title=="":
+            flash("Please give your blog a title", "error")
+            return redirect('/new-blog')
+        if len(body) < 10:
+            flash("You can't tell a good story in under 10 characters!", "error")
+            return redirect('/new-blog')
         blog_entry = Blog(title, today, body)
         db.session.add(blog_entry)
         db.session.commit()
-        return redirect('/')
+        return redirect('/blog?blog-id='+str(blog_entry.id))
 
     return render_template('new-blog.html', title="Add a Blog Entry")
 

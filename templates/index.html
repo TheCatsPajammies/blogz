@@ -6,8 +6,7 @@
 {% else %}
 
     {% for blog in blogs | reverse %}
-    <h3>{{blog.title}}</h2>
-    <h6>{{blog.date}}</h6>
+    <h3><a href="/blog?blog-id={{blog.id}}">{{blog.title}}</a> <small>({{blog.date}})</small></h3>
     <p>{{blog.body}}</p>
     {% endfor %}
 {% endif %}
