@@ -14,16 +14,26 @@
     <title>{{title}}</title>
 </head>
 <body>
+
     <div style='float: right'>
-        <a href='/'>Main Blog Page</a> | <a href='/new-blog'>Add a Blog Entry</a>
+        <a href='/'>Main Blog Page</a> | <a href='/newpost'>Add a Blog Entry</a><br>
+        {% if is_session %}
+            Welcome Back! -- <a href="/logout">take me to where the blogs aren't</a>
+        {% else %}
+            <a href='/login'>login</a> | <a href="/signup">signup</a> | <a href='/logout'>logout</a>
+        {% endif %}
     </div>
+
     {% with messages = get_flashed_messages(with_categories=True) %}
-    {% for category,message in messages %}
-    <p class="{{category}}">{{message}}</p>
-    {% endfor %}
+        {% for category,message in messages %}
+            <p class="{{category}}">{{message}}</p>
+        {% endfor %}
     {% endwith %}
+
     <h1>It's-a-Blog!</h1>
+
     {% block content %}
     {% endblock %}
+
 </body>
 </html>
