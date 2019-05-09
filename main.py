@@ -20,12 +20,14 @@ class Blog(db.Model):
     ##TODO: owner_id to create relationship to User
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(200))
+    author = db.Column(db.String(120))
     date = db.Column(db.Date())
     body = db.Column(db.String(4000))
     owner_id = db.Column(db.Integer, db.ForeignKey('user.id'))
 
-    def __init__(self, title, date, body, owner_id):
+    def __init__(self, title, author, date, body, owner_id):
         self.title = title
+        self.author = author
         self.date = date
         self.body = body
         self.owner_id = owner_id
@@ -33,11 +35,13 @@ class Blog(db.Model):
 class User(db.Model):
     ##TODO: includes id, username, password, and (blogs) a relationship with Blog
     id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(120), unique=True)
     email = db.Column(db.String(120), unique=True)
     pw_hash = db.Column(db.String(120))
     blogs = db.relationship("Blog", backref="user")
 
-    def __init__(self, email, password):
+    def __init__(self, username, email, password):
+        self.username = username
         self.email = email
         self.pw_hash = make_pw_hash(password)
     
@@ -55,14 +59,21 @@ def require_login():
 def index():
     
     blogs = Blog.query.all()
+    users = User.query.all()
 
-    return render_template('index.html', title="Build a Blog!", blogs=blogs, is_session=is_session())
+    return render_template('index.html', title="Blogz!", blogs=blogs, users=users, is_session=is_session())
 
 @app.route('/blog', methods=['GET'])
 def blog():
     id = request.args.get('blog-id')
     blog = Blog.query.filter_by(id = id).first()
     return render_template("blog.html", blog=blog, is_session=is_session())
+
+@app.route('/user', methods=['GET'])
+def user():
+    author = request.args.get('author')
+    blogs = Blog.query.filter_by(author = author).all()
+    return render_template("user.html", blogs=blogs, is_session=is_session())
 
 @app.route('/newpost', methods=['POST','GET'])
 def newpost():
@@ -78,7 +89,8 @@ def newpost():
             return redirect('/newpost')
         owner = User.query.filter_by(email=session['email']).first()
         owner_id = owner.id
-        blog_entry = Blog(title, today, body, owner_id)
+        author = owner.username
+        blog_entry = Blog(title, author, today, body, owner_id)
         db.session.add(blog_entry)
         db.session.commit()
         return redirect('/blog?blog-id='+str(blog_entry.id))
@@ -106,13 +118,14 @@ def login():
 def signup():
     
     if request.method == 'POST':
+        username = request.form['username']
         email = request.form['email']
         password = request.form['password']
         verify = request.form['verify']
 
         existing_user = User.query.filter_by(email=email).first()
         if not existing_user:
-            new_user = User(email,password)
+            new_user = User(username, email,password)
             db.session.add(new_user)
             db.session.commit()
             session['email'] = email
