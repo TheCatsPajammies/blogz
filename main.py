@@ -47,33 +47,34 @@ class User(db.Model):
     
 @app.before_request
 def require_login():
+
     if 'email' in session:
-        email = session['email']
-        flash('Welcome, ' + email, 'success')
+        excepted_routes = ['blog', 'logout']
+        if request.endpoint not in excepted_routes:
+            email = session['email']
+            flash('You are logged in as: ' + email, 'success')
     special_routes = ['newpost']
     if request.endpoint in special_routes and not is_session():
         flash('User must be logged in to write a new entry', 'error')
         return render_template('login.html')
 
-@app.route('/')
+@app.route('/', methods=['GET'])
 def index():
-    
-    blogs = Blog.query.all()
+    page = request.args.get('page', 1, type=int)
+    blogs = Blog.query.order_by(Blog.id.desc()).paginate(page=page, per_page=5)
     users = User.query.all()
-
     return render_template('index.html', title="Blogz!", blogs=blogs, users=users, is_session=is_session())
 
 @app.route('/blog', methods=['GET'])
 def blog():
     id = request.args.get('blog-id')
-    blog = Blog.query.filter_by(id = id).first()
-    return render_template("blog.html", blog=blog, is_session=is_session())
-
-@app.route('/user', methods=['GET'])
-def user():
     author = request.args.get('author')
-    blogs = Blog.query.filter_by(author = author).all()
-    return render_template("user.html", blogs=blogs, is_session=is_session())
+    if id:
+        blog = Blog.query.filter_by(id = id).first()
+        return render_template("blog.html", blog=blog, is_session=is_session())
+    if author:
+        blogs = Blog.query.filter_by(author =author).all()
+        return render_template("singleUser.html", blogs=blogs, is_session=is_session())
 
 @app.route('/newpost', methods=['POST','GET'])
 def newpost():
@@ -145,7 +146,9 @@ def signup():
 
 @app.route('/logout', methods=['GET'])
 def logout():
-    del session['email']
+    if 'email' in session:
+        del session['email']
+        return redirect('/logout')
     return redirect('/')
 
 if __name__ == "__main__":

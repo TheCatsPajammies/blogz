@@ -11,16 +11,25 @@
             color: red;
         }
     </style>
-    <title>{{title}}</title>
+    <!-- Latest compiled and minified CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css">
+    <!-- jQuery library -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <!-- Latest compiled JavaScript -->
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/js/bootstrap.min.js"></script>
+    <meta charset="utf-8">
+    <!-- width=device-width sets the width of the page to follow screen width and zoom similarly -->
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{ title }}</title>
 </head>
 <body>
 
     <div style='float: right'>
         <a href='/'>Main Blog Page</a> | <a href='/newpost'>Add a Blog Entry</a><br>
         {% if is_session %}
-            Welcome Back! -- <a href="/logout">take me to where the blogs aren't</a>
+            <a href="/logout">take me to where the blogs aren't</a>
         {% else %}
-            <a href='/login'>login</a> | <a href="/signup">signup</a> | <a href='/logout'>logout</a>
+            <a href='/login'>login</a> | <a href="/signup">signup</a>
         {% endif %}
     </div>
 
@@ -30,7 +39,7 @@
         {% endfor %}
     {% endwith %}
 
-    <h1>It's-a-Blog!</h1>
+    <h1>Blogz: your one-stop shop for blogs!</h1>
 
     {% block content %}
     {% endblock %}
