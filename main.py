@@ -33,7 +33,6 @@ class Blog(db.Model):
         self.owner_id = owner_id
 
 class User(db.Model):
-    ##TODO: includes id, username, password, and (blogs) a relationship with Blog
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(120), unique=True)
     email = db.Column(db.String(120), unique=True)
@@ -100,7 +99,6 @@ def newpost():
 
 @app.route('/login', methods=['POST', 'GET'])
 def login():
-    ##TODO: user without account clicks "Create Account" is directed to /signup
     if request.method == 'POST':
         email = request.form['email']
         password = request.form['password']
@@ -110,8 +108,10 @@ def login():
             flash("Logged in!", "success")
             return redirect('/newpost')
         else:
-            ##TODO: enters username stored in db but incorrect password or incorrect username is redirected to login with appropriate error message
-            flash("Error!", "error")
+            if not user:
+                flash("No such user!", "error")
+            if user and not check_pw_hash(password, user.pw_hash):
+                flash("Incorrect password!", "error")
         
     return render_template('login.html')
 
@@ -125,19 +125,27 @@ def signup():
         verify = request.form['verify']
 
         existing_user = User.query.filter_by(email=email).first()
-        if not existing_user:
+        existing_username = User.query.filter_by(username=username).first()
+
+        if len(username) > 3 and len(password) > 3 and is_email_valid(email) and not existing_user and not existing_username and password==verify:
             new_user = User(username, email,password)
             db.session.add(new_user)
             db.session.commit()
             session['email'] = email
             return redirect('/')
-        elif existing_user:
-            flash("Error! Existing User!", "error")
-            return render_template('signup.html')
-        else:
-            ##TODO: user leaves any fields blank, enters username that already exists, mismatching passwords, too short a pass/username gets appropriate error messages
-            flash("This doesn't make any sense", "error")
-            return render_template('index.html')
+        if existing_user:
+            flash("User already exists with that email", "error")
+        if existing_username:
+            flash("Username already taken.", "error")
+        if password != verify:
+            flash("Passwords don't match.", "error")
+        if len(username) <= 3:
+            flash("username too short", "error")
+        if is_email_valid(email) == False: 
+            flash("invalid email", "error")
+        if len(password) <= 3:
+            flash("password needs girth", "error")
+        return render_template('signup.html')
     
     return render_template('signup.html')
 

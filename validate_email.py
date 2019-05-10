@@ -2,6 +2,9 @@ def is_email_valid(email):
     
     is_valid=True
 
+    num_at = 0
+    num_dot = 0
+    
     for char in email:
         if char == '@':
             num_at += 1
