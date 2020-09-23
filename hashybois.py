@@ -8,7 +8,3 @@ def check_pw_hash(password, hash):
         return True
     
     return False
-
-# Test Comment
-# Test Comment 2
-
